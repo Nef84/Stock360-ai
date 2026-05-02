@@ -1,0 +1,76 @@
+{
+  "name": "Messenger AI Agent - Stock360",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "messenger",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-messenger",
+      "name": "Messenger Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "messenger-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/webhooks/messenger",
+        "sendHeaders": true,
+        "sendBody": true,
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-backend-messenger",
+      "name": "Call Stock360 Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [550, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}"
+      },
+      "id": "respond-messenger",
+      "name": "Respond to Messenger",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Messenger Webhook": {
+      "main": [
+        [
+          {
+            "node": "Call Stock360 Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Stock360 Backend": {
+      "main": [
+        [
+          {
+            "node": "Respond to Messenger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["messenger", "ai", "stock360"],
+  "triggerCount": 1
+}
