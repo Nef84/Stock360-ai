@@ -93,13 +93,22 @@ async def process_message(db: AsyncSession, phone: str, text: str, channel: Chan
 
 @router.get("/whatsapp")
 async def verify_whatsapp_webhook(
-    hub_mode: str = Query(..., alias="hub.mode"),
-    hub_token: str = Query(..., alias="hub.verify_token"),
-    hub_challenge: str = Query(..., alias="hub.challenge"),
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+    mode: str = Query(None),
+    verify_token: str = Query(None),
+    challenge: str = Query(None),
 ):
     from app.config import settings
-    if hub_mode == "subscribe" and hub_token == settings.WHATSAPP_VERIFY_TOKEN:
-        return PlainTextResponse(content=hub_challenge)
+    
+    # Accept both formats: hub.mode or just mode
+    final_mode = hub_mode or mode
+    final_token = hub_token or verify_token
+    final_challenge = hub_challenge or challenge
+    
+    if final_mode == "subscribe" and final_token == settings.WHATSAPP_VERIFY_TOKEN:
+        return PlainTextResponse(content=final_challenge)
     raise HTTPException(status_code=403, detail="Invalid verify token")
 
 
@@ -128,13 +137,21 @@ async def whatsapp_webhook(request: Request, db: AsyncSession = Depends(get_db))
 
 @router.get("/messenger")
 async def verify_messenger_webhook(
-    hub_mode: str = Query(..., alias="hub.mode"),
-    hub_token: str = Query(..., alias="hub.verify_token"),
-    hub_challenge: str = Query(..., alias="hub.challenge"),
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+    mode: str = Query(None),
+    verify_token: str = Query(None),
+    challenge: str = Query(None),
 ):
     from app.config import settings
-    if hub_mode == "subscribe" and hub_token == settings.MESSENGER_VERIFY_TOKEN:
-        return PlainTextResponse(content=hub_challenge)
+    
+    final_mode = hub_mode or mode
+    final_token = hub_token or verify_token
+    final_challenge = hub_challenge or challenge
+    
+    if final_mode == "subscribe" and final_token == settings.MESSENGER_VERIFY_TOKEN:
+        return PlainTextResponse(content=final_challenge)
     raise HTTPException(status_code=403, detail="Invalid verify token")
 
 
